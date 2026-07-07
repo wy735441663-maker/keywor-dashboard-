@@ -1,0 +1,97 @@
+[
+  {
+    "url": "https://1c5c1ecf7303.5a59d28b.ap-northeast-1.token.awswaf.com/1c5c1ecf7303/d6a7a58005ec/04c5ab18cd2d/inputs?client=browser",
+    "status": 200,
+    "body": "{\"challenge\":{\"input\":\"eyJ2ZXJzaW9uIjoxLCJ1YmlkIjoiYzM3MDEzOWMtYmIwMy00ZWQ0LTk4MTQtNDcxNjc2Nzk3MzE3IiwiYXR0ZW1wdF9pZCI6ImE0MDE0YzFmLWEzOGUtNGM0ZC1iMjNjLTIxMWY3ZDM0MmFhYiIsImNyZWF0ZV90aW1lIjoiMjAyNi0wNS0xM1QwODowMjoyNy41NTc1MDcwNTVaIiwiZGlmZmljdWx0eSI6MSwiY2hhbGxlbmdlX3R5cGUiOiJOZXR3b3JrQmFuZHdpZHRoIn0=\",\"hmac\":\"UFBRJfbTqCqrntvlmkK2NQeFwhpzntrdgH49A33qP+8=\",\"region\":\"ap-northeast-1\"},\"challenge_type\":\"ha9faaffd31b4d5ede2a2e19d2d7fd525f66fee61911511960dcbb52d3c48ce25\",\"difficulty\":1}"
+  },
+  {
+    "url": "https://1c5c1ecf7303.5a59d28b.ap-northeast-1.token.awswaf.com/1c5c1ecf7303/d6a7a58005ec/04c5ab18cd2d/mp_verify",
+    "status": 200,
+    "body": "{\"token\":\"919e9416-4443-4669-8f2e-5969ec8d0ec1:AQoAp5E4gJoAAAAA:XEZm2IElyVjcu1dUWeW4hdbfpYfX1kB47jFxhi6/9nmMwnukMvqDHpq9SEW1Gn/Zk7nsgtQT2IYi0m3v1KtYzEDaZFBzPrpnhE9aNDBcMboMabFTEWIeZj3kPoyppffqqF4yPrBf3vRLV/bfHd4848KcFXEDu5JZbBT39h+5B29vTMeGqqcEo7mnHuFn054Vhg==\",\"inputs\":null}"
+  },
+  {
+    "url": "https://1c5c1ecf7303.5a59d28b.ap-northeast-1.token.awswaf.com/1c5c1ecf7303/d6a7a58005ec/04c5ab18cd2d/mp_verify",
+    "status": 200,
+    "body": "{\"token\":\"919e9416-4443-4669-8f2e-5969ec8d0ec1:AQoAnrQ4RkIGAAAA:iRs0VHcQk2qmKEoE0F/du/0Rd0Sa7QOyI7nEKx+M/nlq0bYF8MAaTHR1uZI9e3ra3XRI/VcbL8+TII4sVXrsj+pln8foezhFJ0WQF4ArDhghovuc42ZFrwGY2atqxFHeJVaAA45LmcL/DCpTM20GIf2HRqtDEkfs7iC5BW7NzsCKhiFJu4BjFWDs1MyDEWfRiw==\",\"inputs\":null}"
+  },
+  {
+    "url": "https://unagi.amazon.com/1/events/com.amazon.csm.customsg.prod",
+    "status": 200,
+    "body": "{}"
+  },
+  {
+    "url": "https://unagi.amazon.com/1/events/com.amazon.csm.csa.prod",
+    "status": 200,
+    "body": "{}"
+  },
+  {
+    "url": "https://unagi.amazon.com/1/events/com.amazon.csm.nexusclient.prod",
+    "status": 200,
+    "body": "{}"
+  },
+  {
+    "url": "https://unagi.amazon.com/1/events/com.amazon.csm.csa.prod",
+    "status": 200,
+    "body": "{}"
+  },
+  {
+    "url": "https://unagi.amazon.com/1/events/com.amazon.csm.csa.prod",
+    "status": 200,
+    "body": "{}"
+  },
+  {
+    "url": "https://www.amazon.com/puff/content?data=%7B%22pageType%22%3A%22Gateway%22%2C%22subPageType%22%3A%22desktop%22%2C%22referrer%22%3A%22https%3A%2F%2Fwww.amazon.com%2F%22%2C%22hostName%22%3A%22www.amazon.com%22%2C%22path%22%3A%22%2F%22%2C%22queryString%22%3A%22%22%7D",
+    "status": 200,
+    "body": "{\"suppression\":{\"disabled\":false,\"suppressUntil\":\"2026-05-13T09:03:26.800Z\",\"suppressionMessage\":\"Customer is unrecognized\"},\"responseType\":\"SUPPRESSION\"}"
+  },
+  {
+    "url": "https://unagi.amazon.com/1/events/com.amazon.csm.nexusclient.prod",
+    "status": 200,
+    "body": "{}"
+  },
+  {
+    "url": "https://unagi.amazon.com/1/events/com.amazon.csm.csa.prod",
+    "status": 200,
+    "body": "{}"
+  },
+  {
+    "url": "https://unagi.amazon.com/1/events/com.amazon.csm.customsg.prod",
+    "status": 200,
+    "body": "{}"
+  },
+  {
+    "url": "https://unagi-na.amazon.com/1/events/com.amazon.BotCXPolicy.na.prod.bd",
+    "status": 200,
+    "body": "{}"
+  },
+  {
+    "url": "https://unagi.amazon.com/1/events/com.amazon.csm.csa.prod",
+    "status": 200,
+    "body": "{}"
+  },
+  {
+    "url": "https://unagi.amazon.com/1/events/com.amazon.csm.csa.prod",
+    "status": 200,
+    "body": "{}"
+  },
+  {
+    "url": "https://unagi.amazon.com/1/events/com.amazon.csm.nexusclient.prod",
+    "status": 200,
+    "body": "{}"
+  },
+  {
+    "url": "https://unagi.amazon.com/1/events/com.amazon.csm.csa.prod",
+    "status": 200,
+    "body": "{}"
+  },
+  {
+    "url": "https://unagi.amazon.com/1/events/com.amazon.csm.csa.prod",
+    "status": 200,
+    "body": "{}"
+  },
+  {
+    "url": "https://unagi.amazon.com/1/events/com.amazon.csm.csa.prod",
+    "status": 200,
+    "body": "{}"
+  }
+]

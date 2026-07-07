@@ -1,0 +1,104 @@
+[
+  {
+    "jobId": "0192d5e6-ddd4-4797-b062-6d496c691d69",
+    "projectId": "ce848a21-58f6-46b1-b03e-f6297fbf4da6",
+    "projectName": "晾衣架",
+    "status": "failed",
+    "startedAt": "2026-06-05T01:00:00.074Z",
+    "finishedAt": "2026-06-05T01:00:00.084Z",
+    "progress": [],
+    "rowCount": 0,
+    "error": "未找到卖家精灵扩展，请确认已安装"
+  },
+  {
+    "jobId": "5b37da31-8502-480b-a43a-292b9add33cf",
+    "projectId": "ce848a21-58f6-46b1-b03e-f6297fbf4da6",
+    "projectName": "晾衣架",
+    "status": "success",
+    "startedAt": "2026-05-13T08:13:22.219Z",
+    "finishedAt": "2026-05-13T08:13:22.219Z",
+    "progress": [
+      "从文件 test-import.csv 自动导入 90 条数据"
+    ],
+    "rowCount": 90,
+    "error": null
+  },
+  {
+    "jobId": "76d8ee35-eb1b-4451-bf70-da5e9db4e1da",
+    "projectId": "ce848a21-58f6-46b1-b03e-f6297fbf4da6",
+    "projectName": "晾衣架",
+    "status": "failed",
+    "startedAt": "2026-05-13T07:25:51.848Z",
+    "finishedAt": "2026-05-13T07:28:17.795Z",
+    "progress": [
+      "错误: Attempted to use detached Frame '8139BE45126E8D8229E49063CAFCC904'."
+    ],
+    "rowCount": 0,
+    "error": "Attempted to use detached Frame '8139BE45126E8D8229E49063CAFCC904'."
+  },
+  {
+    "jobId": "43d1d9c0-a33c-4cb0-aabf-2823a7883e03",
+    "projectId": "ce848a21-58f6-46b1-b03e-f6297fbf4da6",
+    "projectName": "晾衣架",
+    "status": "failed",
+    "startedAt": "2026-05-13T07:22:48.080Z",
+    "finishedAt": "2026-05-13T07:23:12.830Z",
+    "progress": [
+      "错误: Attempted to use detached Frame '8F6C1C9175BC166E45E20BA46BBC5C4D'."
+    ],
+    "rowCount": 0,
+    "error": "Attempted to use detached Frame '8F6C1C9175BC166E45E20BA46BBC5C4D'."
+  },
+  {
+    "jobId": "798a96d3-4c2e-4bd9-84b4-632955e49cae",
+    "projectId": "ce848a21-58f6-46b1-b03e-f6297fbf4da6",
+    "projectName": "晾衣架",
+    "status": "failed",
+    "startedAt": "2026-05-13T07:18:07.613Z",
+    "finishedAt": "2026-05-13T07:20:56.164Z",
+    "progress": [
+      "错误: 未能获取数据，请检查卖家精灵页面"
+    ],
+    "rowCount": 0,
+    "error": "未能获取数据，请检查卖家精灵页面"
+  },
+  {
+    "jobId": "fd11f281-7f69-4ca2-a54d-2c40aee9697e",
+    "projectId": "ce848a21-58f6-46b1-b03e-f6297fbf4da6",
+    "projectName": "晾衣架",
+    "status": "failed",
+    "startedAt": "2026-05-13T07:14:48.625Z",
+    "finishedAt": "2026-05-13T07:14:52.643Z",
+    "progress": [
+      "错误: net::ERR_BLOCKED_BY_CLIENT at chrome-extension://lnbmbgocenenhhhdojdielgnmeflbnfb/collection/index.html"
+    ],
+    "rowCount": 0,
+    "error": "net::ERR_BLOCKED_BY_CLIENT at chrome-extension://lnbmbgocenenhhhdojdielgnmeflbnfb/collection/index.html"
+  },
+  {
+    "jobId": "25aa4c93-dbb5-4d37-a6f5-bb8603f8d3dc",
+    "projectId": "ce848a21-58f6-46b1-b03e-f6297fbf4da6",
+    "projectName": "晾衣架",
+    "status": "failed",
+    "startedAt": "2026-05-13T07:08:53.436Z",
+    "finishedAt": "2026-05-13T07:10:18.266Z",
+    "progress": [
+      "错误: 未收到下载文件，可能是检索未完成或网络问题"
+    ],
+    "rowCount": 0,
+    "error": "未收到下载文件，可能是检索未完成或网络问题"
+  },
+  {
+    "jobId": "f121062d-de1d-43d5-ad03-74bd105801f0",
+    "projectId": "ce848a21-58f6-46b1-b03e-f6297fbf4da6",
+    "projectName": "晾衣架",
+    "status": "failed",
+    "startedAt": "2026-05-13T07:03:23.970Z",
+    "finishedAt": "2026-05-13T07:03:25.408Z",
+    "progress": [
+      "错误: The browser is already running for C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\User Data. Use a different `userDataDir` or stop the running browser first."
+    ],
+    "rowCount": 0,
+    "error": "The browser is already running for C:\\Users\\Administrator\\AppData\\Local\\Google\\Chrome\\User Data. Use a different `userDataDir` or stop the running browser first."
+  }
+]
