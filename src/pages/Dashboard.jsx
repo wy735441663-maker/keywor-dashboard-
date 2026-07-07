@@ -81,48 +81,7 @@ export default function Dashboard({ rawData }) {
     [enriched, effectiveDate]
   );
 
-  // KPI（今日 + 昨日对比）
-  const kpis = useMemo(() => computeKPIs(snapshot), [snapshot]);
-  const yesterdayDate = useMemo(() => {
-    const d = new Date(effectiveDate); d.setDate(d.getDate() - 1);
-    return d.toISOString().split('T')[0];
-  }, [effectiveDate]);
-  const yesterdaySnapshot = useMemo(() => getTodaySnapshot(enriched, yesterdayDate), [enriched, yesterdayDate]);
-  const yesterdayKpis = useMemo(() => computeKPIs(yesterdaySnapshot), [yesterdaySnapshot]);
-
-  // 排行榜数据
-  const naturalUpList = useMemo(
-    () => getRankingList(snapshot, '日环比变化_自然', 'desc'),
-    [snapshot]
-  );
-  const naturalDownList = useMemo(
-    () => getRankingList(snapshot, '日环比变化_自然', 'asc'),
-    [snapshot]
-  );
-  const spUpList = useMemo(
-    () => getRankingList(snapshot, '日环比变化_SP', 'desc'),
-    [snapshot]
-  );
-  const spDownList = useMemo(
-    () => getRankingList(snapshot, '日环比变化_SP', 'asc'),
-    [snapshot]
-  );
-
-  // 折线图数据（30天窗口，以选定日期为终点）
-  const trendData = useMemo(
-    () => getKeywordTrend(enriched, activeKeyword, 30, effectiveDate),
-    [enriched, activeKeyword, effectiveDate]
-  );
-
-  // 7天变化数据
-  const sevenDayData = useMemo(() => getSevenDayChanges(enriched), [enriched]);
-
-  // 关键词点击联动
-  const handleKeywordClick = (keyword) => {
-    setActiveKeyword(keyword);
-  };
-
-  // 根据项目获取关键词列表（处理字符串/数组两种情况）
+  // 根据项目获取关键词列表（提前，KPI也需要用）
   const getProjectKeywords = (proj) => {
     if (!proj) return [];
     const kw = proj.keywords;
@@ -131,46 +90,72 @@ export default function Dashboard({ rawData }) {
     return [];
   };
 
-  // 筛选后的明细数据
-  const filteredSnapshot = useMemo(() => {
-    let result = snapshot;
-    // 项目筛选：优先按项目关键词过滤（未选ASIN时），选了ASIN则只按ASIN过滤
-    if (selectedProject && !selectedAsin && !selectedKeyword) {
+  // 统一筛选函数：对所有数据生效（KPI + 排行榜 + 明细）
+  const filterData = (data) => {
+    let result = data;
+    if (selectedProject) {
       const proj = projects.find(p => p.name === selectedProject);
       const pkw = getProjectKeywords(proj);
       if (pkw.length > 0) result = result.filter(d => pkw.includes(d.keyword));
+      const projAsin = proj ? (proj.asins || [proj.asin]).filter(Boolean) : [];
+      if (projAsin.length > 0 && !selectedAsin) {
+        result = result.filter(d => projAsin.includes(d.asin));
+      }
     }
     if (selectedKeyword) result = result.filter(d => d.keyword === selectedKeyword);
     if (selectedAsin) result = result.filter(d => d.asin === selectedAsin);
     if (selectedOwner) {
-      const proj = projects.find(p => p.owner === selectedOwner);
-      const pkw = getProjectKeywords(proj);
-      if (pkw.length > 0) result = result.filter(d => pkw.includes(d.keyword));
+      const ownerProjs = projects.filter(p => p.owner === selectedOwner);
+      const okw = new Set(ownerProjs.flatMap(p => getProjectKeywords(p)));
+      if (okw.size > 0) result = result.filter(d => okw.has(d.keyword));
     }
     return result;
-  }, [snapshot, selectedKeyword, selectedAsin, selectedProject, selectedOwner, projects]);
+  };
 
-  // 将筛选后的snapshot传给RankingTabs
-  const filteredNaturalUp = useMemo(() => {
-    if (!selectedKeyword && !selectedAsin) return naturalUpList;
-    return getRankingList(filteredSnapshot, '日环比变化_自然', 'desc');
-  }, [filteredSnapshot, naturalUpList, selectedKeyword, selectedAsin]);
+  const filteredSnap = useMemo(() => filterData(snapshot), [snapshot, selectedProject, selectedKeyword, selectedAsin, selectedOwner, projects]);
+  const filteredEnriched = useMemo(() => filterData(enriched), [enriched, selectedProject, selectedKeyword, selectedAsin, selectedOwner, projects]);
 
-  const filteredNaturalDown = useMemo(() => {
-    if (!selectedKeyword && !selectedAsin) return naturalDownList;
-    return getRankingList(filteredSnapshot, '日环比变化_自然', 'asc');
-  }, [filteredSnapshot, naturalDownList, selectedKeyword, selectedAsin]);
+  // KPI（今日 + 昨日对比）——使用筛选后数据
+  const kpis = useMemo(() => computeKPIs(filteredSnap), [filteredSnap]);
+  const yesterdayDate = useMemo(() => {
+    const d = new Date(effectiveDate); d.setDate(d.getDate() - 1);
+    return d.toISOString().split('T')[0];
+  }, [effectiveDate]);
+  const yesterdaySnap = useMemo(() => getTodaySnapshot(filteredEnriched, yesterdayDate), [filteredEnriched, yesterdayDate]);
+  const yesterdayKpis = useMemo(() => computeKPIs(yesterdaySnap), [yesterdaySnap]);
 
-  const filteredSpUp = useMemo(() => {
-    if (!selectedKeyword && !selectedAsin) return spUpList;
-    return getRankingList(filteredSnapshot, '日环比变化_SP', 'desc');
-  }, [filteredSnapshot, spUpList, selectedKeyword, selectedAsin]);
+  // 排行榜数据 —— 使用筛选后数据
+  const naturalUpList = useMemo(
+    () => getRankingList(filteredSnap, '日环比变化_自然', 'desc'),
+    [filteredSnap]
+  );
+  const naturalDownList = useMemo(
+    () => getRankingList(filteredSnap, '日环比变化_自然', 'asc'),
+    [filteredSnap]
+  );
+  const spUpList = useMemo(
+    () => getRankingList(filteredSnap, '日环比变化_SP', 'desc'),
+    [filteredSnap]
+  );
+  const spDownList = useMemo(
+    () => getRankingList(filteredSnap, '日环比变化_SP', 'asc'),
+    [filteredSnap]
+  );
+  // 折线图数据（30天窗口，以选定日期为终点）
+  const trendData = useMemo(
+    () => getKeywordTrend(filteredEnriched, activeKeyword, 30, effectiveDate),
+    [filteredEnriched, activeKeyword, effectiveDate]
+  );
 
-  const filteredSpDown = useMemo(() => {
-    if (!selectedKeyword && !selectedAsin) return spDownList;
-    return getRankingList(filteredSnapshot, '日环比变化_SP', 'asc');
-  }, [filteredSnapshot, spDownList, selectedKeyword, selectedAsin]);
+  // 7天变化数据
+  const sevenDayData = useMemo(() => getSevenDayChanges(filteredEnriched), [filteredEnriched]);
 
+  // 关键词点击联动
+  const handleKeywordClick = (keyword) => {
+    setActiveKeyword(keyword);
+  };
+
+  
   return (
     <div>
       {/* 筛选器 */}
@@ -207,13 +192,13 @@ export default function Dashboard({ rawData }) {
 
       {/* 排行榜 */}
       <RankingTabs
-        naturalUpList={filteredNaturalUp}
-        naturalDownList={filteredNaturalDown}
-        spUpList={filteredSpUp}
-        spDownList={filteredSpDown}
+        naturalUpList={naturalUpList}
+        naturalDownList={naturalDownList}
+        spUpList={spUpList}
+        spDownList={spDownList}
         onKeywordClick={handleKeywordClick}
         activeKeyword={activeKeyword}
-        enriched={enriched}
+        enriched={filteredEnriched}
         effectiveDate={effectiveDate}
       />
 
@@ -230,7 +215,7 @@ export default function Dashboard({ rawData }) {
       {/* 明细表格 */}
       <div style={{ marginTop: 16 }}>
         <DetailTable
-          snapshot={filteredSnapshot}
+          snapshot={filteredSnap}
           onKeywordClick={handleKeywordClick}
           activeKeyword={activeKeyword}
         />
