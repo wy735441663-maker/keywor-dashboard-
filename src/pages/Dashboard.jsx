@@ -31,7 +31,7 @@ export default function Dashboard({ rawData }) {
   // 加载项目配置（从后端 API）
   const [projects, setProjects] = useState([]);
   useEffect(() => {
-    fetch('/api/projects').then(r => r.json()).then(setProjects).catch(() => {});
+    try { const raw = localStorage.getItem('keyword-dashboard-projects'); if (raw) setProjects(JSON.parse(raw)); } catch {}
   }, []);
   const projectNames = useMemo(() => [...new Set(projects.map(p => p.name))].sort(), [projects]);
   const owners = useMemo(() => [...new Set(projects.map(p => p.owner).filter(Boolean))].sort(), [projects]);

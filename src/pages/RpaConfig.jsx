@@ -4,17 +4,14 @@ export default function RpaConfig() {
   const [projects, setProjects] = useState([]);
 
   useEffect(() => {
-    fetch('/api/projects')
-      .then(r => r.json())
-      .then(setProjects)
-      .catch(() => {});
-  }, []);
-
-  // 每30秒自动刷新
-  useEffect(() => {
-    const t = setInterval(() => {
-      fetch('/api/projects').then(r => r.json()).then(setProjects).catch(() => {});
-    }, 30000);
+    const load = () => {
+      try {
+        const raw = localStorage.getItem('keyword-dashboard-projects');
+        if (raw) setProjects(JSON.parse(raw));
+      } catch {}
+    };
+    load();
+    const t = setInterval(load, 10000);
     return () => clearInterval(t);
   }, []);
 

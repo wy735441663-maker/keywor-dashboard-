@@ -126,10 +126,12 @@ export default function Config() {
   const [editing, setEditing] = useState(null);
   const [mergeInfo, setMergeInfo] = useState({ loading: true, count: 0 });
 
-  useEffect(() => { refreshProjects(); checkData(); }, []);
-  const refreshProjects = async () => {
-    const data = await loadProjects();
-    setProjects(data);
+  useEffect(() => {
+    setProjects(loadProjects());
+    checkData();
+  }, []);
+  const refreshProjects = () => {
+    setProjects(loadProjects());
   };
 
   const checkData = async () => {
@@ -150,27 +152,26 @@ export default function Config() {
   };
 
   // 保存项目 → 后端 → 触发 Excel 生成
-  const handleSave = async (projectData) => {
+  const handleSave = (projectData) => {
     const payload = {
       name: projectData.name, asin: projectData.asins?.[0] || '',
       asins: projectData.asins, keywords: projectData.keywords, owner: projectData.owner,
     };
     if (editing) {
-      await updateProject(editing.id, payload);
+      updateProject(editing.id, payload);
     } else {
-      await createProject(payload);
+      createProject(payload);
     }
-    await refreshProjects();
+    refreshProjects();
     setShowModal(false);
     setEditing(null);
-    showToast(`已保存「${projectData.name}」`);
-    syncToExcel();
+    showToast('已保存「' + projectData.name + '」（浏览器本地存储）');
+    
   };
 
-  const handleDelete = async (id) => {
-    await deleteProject(id);
-    await refreshProjects();
-    syncToExcel();
+  const handleDelete = (id) => {
+    deleteProject(id);
+    refreshProjects();
     showToast('已删除');
   };
 
@@ -179,17 +180,6 @@ export default function Config() {
     setShowModal(true);
   };
 
-  // 调用后端 API 生成 Excel
-  const syncToExcel = async () => {
-    try {
-      const data = await loadProjects();
-      await fetch('/api/sync-excel', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-    } catch {}
-  };
 
   const handleRefreshData = async () => {
     showToast('正在合并 Excel 数据...');
@@ -251,6 +241,13 @@ export default function Config() {
             + 添加项目
           </button>
         </div>
+      </div>
+
+      <div style={{
+        background: '#fff3cd', border: '1px solid #ffc107', borderRadius: 8,
+        padding: '10px 14px', marginBottom: 14, fontSize: 12, color: '#856404',
+      }}>
+        <strong>注意：</strong>项目配置保存在浏览器本地。其他设备或浏览器需要重新录入。
       </div>
 
       {/* 项目总览卡片 */}
