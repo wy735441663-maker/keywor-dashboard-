@@ -1,28 +1,37 @@
 import { useState, useEffect } from 'react';
 
-// 后端 API 操作
-const API = '/api/projects';
+// 本地存储操作（Render 磁盘不可靠，改用浏览器 localStorage）
+const STORAGE_KEY = 'keyword-dashboard-projects';
 
-async function loadProjects() {
+function loadProjects() {
   try {
-    const res = await fetch(API);
-    if (res.ok) return await res.json();
-  } catch {}
-  return [];
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
 }
 
-async function createProject(data) {
-  const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-  return res.json();
+function saveProjectsToLocal(projects) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
 }
 
-async function updateProject(id, data) {
-  const res = await fetch(`${API}/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-  return res.json();
+function createProject(data) {
+  const all = loadProjects();
+  const p = { ...data, id: data.id || Date.now().toString(), createdAt: new Date().toISOString() };
+  all.push(p);
+  saveProjectsToLocal(all);
+  return p;
 }
 
-async function deleteProject(id) {
-  await fetch(`${API}/${id}`, { method: 'DELETE' });
+function updateProject(id, data) {
+  const all = loadProjects();
+  const idx = all.findIndex(p => p.id === id);
+  if (idx >= 0) { all[idx] = { ...all[idx], ...data, updatedAt: new Date().toISOString() }; }
+  saveProjectsToLocal(all);
+  return all[idx];
+}
+
+function deleteProject(id) {
+  saveProjectsToLocal(loadProjects().filter(p => p.id !== id));
 }
 
 // 智能解析分隔符：换行、逗号、顿号、分号、空格 等
