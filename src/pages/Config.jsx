@@ -145,7 +145,7 @@ export default function Config() {
 
   const checkData = async () => {
     try {
-      const res = await fetch('/merged-data.json');
+      const res = await fetch('/api/merged-data');
       if (res.ok) {
         const data = await res.json();
         setMergeInfo({ loading: false, count: data.length });

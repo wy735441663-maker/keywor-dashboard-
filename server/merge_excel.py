@@ -10,7 +10,7 @@ except ImportError:
     import openpyxl
 
 DATA_DIR = os.environ.get("SELLER_DATA_DIR", "C:/Users/Administrator/Desktop/文件夹/AI学习/try/卖家精灵下载数据")
-OUTPUT_DIR = os.environ.get("OUTPUT_DIR", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "dist"))
+OUTPUT_DIR = os.environ.get("OUTPUT_DIR", "/tmp" if os.name != "nt" else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "dist"))
 OUTPUT_FILE = os.path.join(OUTPUT_DIR, "merged-data.json")
 NOT_FOUND_RANK = 999
 

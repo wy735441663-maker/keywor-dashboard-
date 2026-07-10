@@ -14,7 +14,7 @@ export default function App() {
   const loadData = useCallback(async () => {
     // 优先加载合并的 Excel 数据
     try {
-      const res = await fetch('/merged-data.json?t=' + Date.now());
+      const res = await fetch('/api/merged-data?t=' + Date.now());
       if (res.ok) {
         const data = await res.json();
         if (data && data.length > 0) {

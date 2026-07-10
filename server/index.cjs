@@ -180,6 +180,22 @@ app.get('/api/projects/:id/scrape-status', (req, res) => {
 
 // ===================== Data API =====================
 
+// 合并后的排名数据（写入 /tmp，不受部署影响）
+app.get('/api/merged-data', (req, res) => {
+  const tmpPath = '/tmp/merged-data.json';
+  if (fs.existsSync(tmpPath)) {
+    res.sendFile(tmpPath);
+  } else {
+    // 回退到 dist 中的静态文件（如果有）
+    const distPath = path.join(distDir, 'merged-data.json');
+    if (fs.existsSync(distPath)) {
+      res.sendFile(distPath);
+    } else {
+      res.json([]);
+    }
+  }
+});
+
 app.get('/api/data', (req, res) => {
   const { projectId } = req.query;
   if (projectId) {
