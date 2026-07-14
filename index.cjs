@@ -481,31 +481,25 @@ const upload = multer({
 let lastMergeCount = 0;
 
 let mergeTimer = null;
-let mergeRunning = false;
 
 function scheduleMerge(delayMs = 3000) {
   if (mergeTimer) clearTimeout(mergeTimer);
-  mergeTimer = setTimeout(() => {
-    mergeTimer = null;
-    runMergeScript();
-  }, delayMs);
+  mergeTimer = setTimeout(runMergeScript, delayMs);
 }
 
 function runMergeScript() {
-  if (mergeRunning) { console.log('[数据合并] 跳过（已有合并进行中）'); return; }
-  mergeRunning = true;
   const { spawn } = require('child_process');
   const env = { ...process.env, SELLER_DATA_DIR, OUTPUT_DIR: distDir };
   const py = spawn('python3', [path.join(__dirname, 'merge_excel.py')], { env });
   let out = '';
+  let err = '';
   py.stdout.on('data', d => out += d.toString());
-  py.stderr.on('data', d => out += d.toString());
-  py.on('close', () => {
-    mergeRunning = false;
-    const lines = out.trim().split('\n');
-    const last = lines.pop() || '';
-    console.log(`[数据合并] ${last}`);
+  py.stderr.on('data', d => err += d.toString());
+  py.on('close', (code) => {
+    console.log(`[数据合并] exit=${code} ${out.trim().split(/\n/).pop() || ''}`);
+    if (err) console.log(`[数据合并] stderr: ${err.slice(0,200)}`);
   });
+  py.on('error', (e) => console.log(`[数据合并] spawn error: ${e.message}`));
 }
 
 // Excel 文件夹轮询（每30秒检查新文件）
