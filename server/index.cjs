@@ -186,13 +186,7 @@ app.get('/api/merged-data', (req, res) => {
   if (fs.existsSync(tmpPath)) {
     res.sendFile(tmpPath);
   } else {
-    // 回退到 dist 中的静态文件（如果有）
-    const distPath = path.join(distDir, 'merged-data.json');
-    if (fs.existsSync(distPath)) {
-      res.sendFile(distPath);
-    } else {
-      res.json([]);
-    }
+    res.json([]);
   }
 });
 
@@ -486,18 +480,26 @@ const upload = multer({
 });
 let lastMergeCount = 0;
 
+let mergeTimer = null;
+
+function scheduleMerge(delayMs = 3000) {
+  if (mergeTimer) clearTimeout(mergeTimer);
+  mergeTimer = setTimeout(runMergeScript, delayMs);
+}
+
 function runMergeScript() {
   const { spawn } = require('child_process');
   const env = { ...process.env, SELLER_DATA_DIR, OUTPUT_DIR: distDir };
   const py = spawn('python3', [path.join(__dirname, 'merge_excel.py')], { env });
   let out = '';
+  let err = '';
   py.stdout.on('data', d => out += d.toString());
-  py.stderr.on('data', d => out += d.toString());
-  py.on('close', () => {
-    const lines = out.trim().split('\n');
-    const last = lines.pop() || '';
-    console.log(`[数据合并] ${last}`);
+  py.stderr.on('data', d => err += d.toString());
+  py.on('close', (code) => {
+    console.log(`[数据合并] exit=${code} ${out.trim().split(/\n/).pop() || ''}`);
+    if (err) console.log(`[数据合并] stderr: ${err.slice(0,200)}`);
   });
+  py.on('error', (e) => console.log(`[数据合并] spawn error: ${e.message}`));
 }
 
 // Excel 文件夹轮询（每30秒检查新文件）
@@ -509,8 +511,8 @@ function scanSellerData() {
     const hasNew = files.some(f => !knownExcelFiles.has(f));
     knownExcelFiles = current;
     if (hasNew) {
-      console.log(`[数据合并] 检测到新 Excel，自动合并...`);
-      runMergeScript();
+      console.log(`[数据合并] 检测到新 Excel...`);
+      scheduleMerge(3000);
     }
   } catch {}
 }
@@ -523,7 +525,7 @@ function setupFileWatcher() {
   // 每30秒扫描 Excel 数据文件夹
   setInterval(scanSellerData, 30000);
   // 启动时立即合并一次
-  runMergeScript();
+  scheduleMerge(2000);
   console.log(`[数据合并] 监听目录: ${SELLER_DATA_DIR}`);
 }
 
@@ -546,8 +548,8 @@ app.post('/api/upload-excel', upload.single('file'), (req, res) => {
   const originalname = req.file.originalname;
   console.log(`[上传] 收到: ${originalname} -> ${filename}`);
 
-  // 立即触发合并
-  runMergeScript();
+  // 延迟合并（等所有文件上传完后只执行一次）
+  scheduleMerge(3000);
 
   res.json({
     success: true,
@@ -560,8 +562,8 @@ app.post('/api/upload-excel', upload.single('file'), (req, res) => {
 
 // 手动刷新合并数据
 app.post('/api/refresh-data', (req, res) => {
-  runMergeScript();
-  res.json({ success: true, message: '正在合并...', count: lastMergeCount });
+  scheduleMerge(1000); // 手动刷新等1秒
+  res.json({ success: true, message: '合并已调度' });
 });
 
 // AI 分析 API（流式）

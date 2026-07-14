@@ -174,8 +174,11 @@ def main():
 
     merged.sort(key=lambda x: (x.get("date",""), x.get("keyword","")))
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+    # 先写临时文件，再原子替换，防止并发读取到半截文件
+    tmp_file = OUTPUT_FILE + ".tmp"
+    with open(tmp_file, "w", encoding="utf-8") as f:
         json.dump(merged, f, ensure_ascii=False, indent=2)
+    os.replace(tmp_file, OUTPUT_FILE)
     print(f"[OK] {len(merged)} rows (SP: {sp_count}) -> {OUTPUT_FILE}")
 
 if __name__ == "__main__":
