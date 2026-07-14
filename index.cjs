@@ -480,7 +480,20 @@ const upload = multer({
 });
 let lastMergeCount = 0;
 
+let mergeTimer = null;
+let mergeRunning = false;
+
+function scheduleMerge(delayMs = 3000) {
+  if (mergeTimer) clearTimeout(mergeTimer);
+  mergeTimer = setTimeout(() => {
+    mergeTimer = null;
+    runMergeScript();
+  }, delayMs);
+}
+
 function runMergeScript() {
+  if (mergeRunning) { console.log('[数据合并] 跳过（已有合并进行中）'); return; }
+  mergeRunning = true;
   const { spawn } = require('child_process');
   const env = { ...process.env, SELLER_DATA_DIR, OUTPUT_DIR: distDir };
   const py = spawn('python3', [path.join(__dirname, 'merge_excel.py')], { env });
@@ -488,6 +501,7 @@ function runMergeScript() {
   py.stdout.on('data', d => out += d.toString());
   py.stderr.on('data', d => out += d.toString());
   py.on('close', () => {
+    mergeRunning = false;
     const lines = out.trim().split('\n');
     const last = lines.pop() || '';
     console.log(`[数据合并] ${last}`);
@@ -503,8 +517,8 @@ function scanSellerData() {
     const hasNew = files.some(f => !knownExcelFiles.has(f));
     knownExcelFiles = current;
     if (hasNew) {
-      console.log(`[数据合并] 检测到新 Excel，自动合并...`);
-      runMergeScript();
+      console.log(`[数据合并] 检测到新 Excel...`);
+      scheduleMerge(3000);
     }
   } catch {}
 }
@@ -517,7 +531,7 @@ function setupFileWatcher() {
   // 每30秒扫描 Excel 数据文件夹
   setInterval(scanSellerData, 30000);
   // 启动时立即合并一次
-  runMergeScript();
+  scheduleMerge(2000);
   console.log(`[数据合并] 监听目录: ${SELLER_DATA_DIR}`);
 }
 
@@ -540,8 +554,8 @@ app.post('/api/upload-excel', upload.single('file'), (req, res) => {
   const originalname = req.file.originalname;
   console.log(`[上传] 收到: ${originalname} -> ${filename}`);
 
-  // 立即触发合并
-  runMergeScript();
+  // 延迟合并（等所有文件上传完后只执行一次）
+  scheduleMerge(3000);
 
   res.json({
     success: true,
@@ -554,8 +568,8 @@ app.post('/api/upload-excel', upload.single('file'), (req, res) => {
 
 // 手动刷新合并数据
 app.post('/api/refresh-data', (req, res) => {
-  runMergeScript();
-  res.json({ success: true, message: '正在合并...', count: lastMergeCount });
+  scheduleMerge(1000); // 手动刷新等1秒
+  res.json({ success: true, message: '合并已调度' });
 });
 
 // AI 分析 API（流式）
