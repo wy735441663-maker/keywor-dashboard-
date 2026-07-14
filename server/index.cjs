@@ -180,6 +180,18 @@ app.get('/api/projects/:id/scrape-status', (req, res) => {
 
 // ===================== Data API =====================
 
+// 接收本地合并好的 JSON 数据
+app.post('/api/upload-merged-data', (req, res) => {
+  const data = req.body;
+  if (!Array.isArray(data) || data.length === 0) {
+    return res.status(400).json({ error: '无效数据' });
+  }
+  const tmpPath = '/tmp/merged-data.json';
+  fs.writeFileSync(tmpPath, JSON.stringify(data), 'utf-8');
+  console.log(`[合并数据] 接收到 ${data.length} 条`);
+  res.json({ success: true, count: data.length });
+});
+
 // 合并后的排名数据（写入 /tmp，不受部署影响）
 app.get('/api/merged-data', (req, res) => {
   const tmpPath = '/tmp/merged-data.json';
