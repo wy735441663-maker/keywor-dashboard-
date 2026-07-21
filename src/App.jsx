@@ -6,6 +6,8 @@ import RpaConfig from './pages/RpaConfig';
 import AbaConfig from './components/AbaConfig';
 import { generateMockData } from './data/mockData';
 
+const API_BASE = import.meta.env.VITE_API_BASE || '';
+
 export default function App() {
   const [rawData, setRawData] = useState(null);
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -14,7 +16,7 @@ export default function App() {
   const loadData = useCallback(async () => {
     // 优先加载合并的 Excel 数据
     try {
-      const res = await fetch('/api/merged-data?t=' + Date.now());
+      const res = await fetch(API_BASE + '/api/merged-data?t=' + Date.now());
       if (res.ok) {
         const data = await res.json();
         if (data && data.length > 0) {
@@ -42,7 +44,14 @@ export default function App() {
       loadData().then(data => setRawData(data));
     };
     window.addEventListener('data-updated', handler);
-    return () => window.removeEventListener('data-updated', handler);
+    // Auto-refresh every 60 seconds
+    const interval = setInterval(() => {
+      loadData().then(data => setRawData(data));
+    }, 60000);
+    return () => {
+      window.removeEventListener('data-updated', handler);
+      clearInterval(interval);
+    };
   }, [loadData]);
 
   const refreshData = () => {

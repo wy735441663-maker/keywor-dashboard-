@@ -4,12 +4,7 @@ export default function RpaConfig() {
   const [projects, setProjects] = useState([]);
 
   useEffect(() => {
-    const load = () => {
-      try {
-        const raw = localStorage.getItem('keyword-dashboard-projects');
-        if (raw) setProjects(JSON.parse(raw));
-      } catch {}
-    };
+    const load = () => fetch('/api/projects').then(r => r.json()).then(setProjects).catch(() => {});
     load();
     const t = setInterval(load, 10000);
     return () => clearInterval(t);

@@ -197,6 +197,7 @@ input:focus, select:focus, textarea:focus {
 .tag-big { background: #fef3c7; color: #92400e; }
 .tag-medium { background: #dbeafe; color: #1e40af; }
 .tag-small { background: #f3f4f6; color: #6b7280; }
+.tag-none { background: #f9fafb; color: #9ca3af; }
 
 /* Section Titles */
 .section-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: var(--text); letter-spacing: -.2px; }

@@ -21,7 +21,7 @@ fs.mkdirSync(IMPORTED_DIR, { recursive: true });
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '5mb' }));
 
 // 托管前端静态文件（生产模式）
 const distDir = path.join(__dirname, '..', 'dist');
@@ -180,7 +180,7 @@ app.get('/api/projects/:id/scrape-status', (req, res) => {
 
 // ===================== Data API =====================
 
-// 接收本地合并好的 JSON 数据
+// 接收本地合并好的 JSON 数据（允许大文件）
 app.post('/api/upload-merged-data', (req, res) => {
   const data = req.body;
   if (!Array.isArray(data) || data.length === 0) {
@@ -196,10 +196,13 @@ app.post('/api/upload-merged-data', (req, res) => {
 app.get('/api/merged-data', (req, res) => {
   const tmpPath = '/tmp/merged-data.json';
   if (fs.existsSync(tmpPath)) {
-    res.sendFile(tmpPath);
-  } else {
-    res.json([]);
+    return res.sendFile(tmpPath);
   }
+  const distPath = path.join(distDir, 'merged-data.json');
+  if (fs.existsSync(distPath)) {
+    return res.sendFile(distPath);
+  }
+  res.json([]);
 });
 
 app.get('/api/data', (req, res) => {

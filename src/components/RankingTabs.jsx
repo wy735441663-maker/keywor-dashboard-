@@ -141,9 +141,9 @@ export default function RankingTabs({
               </div>
 
               <div style={{ flexShrink: 0, width: 66, textAlign: 'left', paddingLeft: 4 }}>
-                <span className={`tag tag-${getAbaGroup(item['ABA周排名'], thresholds) === '大词' ? 'big' : getAbaGroup(item['ABA周排名'], thresholds) === '中词' ? 'medium' : 'small'}`}
+                <span className={`tag tag-${getAbaGroup(item['ABA周排名'], thresholds) === '大词' ? 'big' : getAbaGroup(item['ABA周排名'], thresholds) === '中词' ? 'medium' : getAbaGroup(item['ABA周排名'], thresholds) === '未入榜' ? 'none' : 'small'}`}
                   style={{ fontSize: 11 }}>
-                  {(item['ABA周排名'] / 10000).toFixed(1)}万
+                  {item['ABA周排名'] < 10000 ? item['ABA周排名'].toLocaleString() : (item['ABA周排名'] / 10000).toFixed(1) + '万'}
                 </span>
               </div>
 
@@ -190,6 +190,7 @@ export default function RankingTabs({
             <option value="大词">大词</option>
             <option value="中词">中词</option>
             <option value="小词">小词</option>
+            <option value="未入榜">未入榜</option>
           </select>
         </div>
       </div>

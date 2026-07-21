@@ -1,37 +1,30 @@
 import { useState, useEffect } from 'react';
 
-// 本地存储操作（Render 磁盘不可靠，改用浏览器 localStorage）
-const STORAGE_KEY = 'keyword-dashboard-projects';
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
-function loadProjects() {
+// 后端 API 操作（本地服务，持久化存储，跨设备共享）
+const API = API_BASE + '/api/projects';
+
+async function loadProjects() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch { return []; }
+    const res = await fetch(API);
+    if (res.ok) return await res.json();
+  } catch {}
+  return [];
 }
 
-function saveProjectsToLocal(projects) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+async function createProject(data) {
+  const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+  return res.json();
 }
 
-function createProject(data) {
-  const all = loadProjects();
-  const p = { ...data, id: data.id || Date.now().toString(), createdAt: new Date().toISOString() };
-  all.push(p);
-  saveProjectsToLocal(all);
-  return p;
+async function updateProject(id, data) {
+  const res = await fetch(API + '/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+  return res.json();
 }
 
-function updateProject(id, data) {
-  const all = loadProjects();
-  const idx = all.findIndex(p => p.id === id);
-  if (idx >= 0) { all[idx] = { ...all[idx], ...data, updatedAt: new Date().toISOString() }; }
-  saveProjectsToLocal(all);
-  return all[idx];
-}
-
-function deleteProject(id) {
-  saveProjectsToLocal(loadProjects().filter(p => p.id !== id));
+async function deleteProject(id) {
+  await fetch(API + '/' + id, { method: 'DELETE' });
 }
 
 // 智能解析分隔符：换行、逗号、顿号、分号、空格 等
@@ -136,16 +129,17 @@ export default function Config() {
   const [mergeInfo, setMergeInfo] = useState({ loading: true, count: 0 });
 
   useEffect(() => {
-    setProjects(loadProjects());
+    loadProjects().then(setProjects);
     checkData();
   }, []);
-  const refreshProjects = () => {
-    setProjects(loadProjects());
+  const refreshProjects = async () => {
+    const data = await loadProjects();
+    setProjects(data);
   };
 
   const checkData = async () => {
     try {
-      const res = await fetch('/api/merged-data');
+      const res = await fetch(API_BASE + '/api/merged-data');
       if (res.ok) {
         const data = await res.json();
         setMergeInfo({ loading: false, count: data.length });
@@ -160,28 +154,40 @@ export default function Config() {
     setTimeout(() => setToast(null), 2500);
   };
 
-  // 保存项目 → 后端 → 触发 Excel 生成
-  const handleSave = (projectData) => {
+  // 保存项目
+  const handleSave = async (projectData) => {
     const payload = {
       name: projectData.name, asin: projectData.asins?.[0] || '',
       asins: projectData.asins, keywords: projectData.keywords, owner: projectData.owner,
     };
     if (editing) {
-      updateProject(editing.id, payload);
+      await updateProject(editing.id, payload);
     } else {
-      createProject(payload);
+      await createProject(payload);
     }
-    refreshProjects();
+    await refreshProjects();
     setShowModal(false);
     setEditing(null);
-    showToast('已保存「' + projectData.name + '」（浏览器本地存储）');
-    
+    showToast('已保存「' + projectData.name + '」');
+    syncToExcel();
   };
 
-  const handleDelete = (id) => {
-    deleteProject(id);
-    refreshProjects();
+  const handleDelete = async (id) => {
+    await deleteProject(id);
+    await refreshProjects();
     showToast('已删除');
+    syncToExcel();
+  };
+
+  const syncToExcel = async () => {
+    try {
+      const data = await loadProjects();
+      await fetch(API_BASE + '/api/sync-excel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+    } catch {}
   };
 
   const handleEdit = (project) => {
@@ -193,7 +199,7 @@ export default function Config() {
   const handleRefreshData = async () => {
     showToast('正在合并 Excel 数据...');
     try {
-      const res = await fetch('/api/refresh-data', { method: 'POST' });
+      const res = await fetch(API_BASE + '/api/refresh-data', { method: 'POST' });
       if (res.ok) {
         // 等1秒让 Python 脚本跑完，然后刷新
         setTimeout(async () => {
@@ -250,13 +256,6 @@ export default function Config() {
             + 添加项目
           </button>
         </div>
-      </div>
-
-      <div style={{
-        background: '#fff3cd', border: '1px solid #ffc107', borderRadius: 8,
-        padding: '10px 14px', marginBottom: 14, fontSize: 12, color: '#856404',
-      }}>
-        <strong>注意：</strong>项目配置保存在浏览器本地。其他设备或浏览器需要重新录入。
       </div>
 
       {/* 项目总览卡片 */}

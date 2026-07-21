@@ -1,5 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import FilterBar from '../components/FilterBar';
+
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 import DateCalendar from '../components/DateCalendar';
 import KPICards from '../components/KPICards';
 import RankingTabs from '../components/RankingTabs';
@@ -31,7 +33,7 @@ export default function Dashboard({ rawData }) {
   // 加载项目配置（从后端 API）
   const [projects, setProjects] = useState([]);
   useEffect(() => {
-    try { const raw = localStorage.getItem('keyword-dashboard-projects'); if (raw) setProjects(JSON.parse(raw)); } catch {}
+    fetch(API_BASE + '/api/projects').then(r => r.json()).then(setProjects).catch(() => {})
   }, []);
   const projectNames = useMemo(() => [...new Set(projects.map(p => p.name))].sort(), [projects]);
   const owners = useMemo(() => [...new Set(projects.map(p => p.owner).filter(Boolean))].sort(), [projects]);
@@ -41,6 +43,22 @@ export default function Dashboard({ rawData }) {
   const [selectedProject, setSelectedProject] = useState('');
   const [selectedKeyword, setSelectedKeyword] = useState('');
   const [selectedAsin, setSelectedAsin] = useState('');
+  const [initialized, setInitialized] = useState(false);
+
+  // 默认选中第一个有数据的项目
+  useEffect(() => {
+    if (!initialized && projectNames.length > 0) {
+      // 选第一个有关键词匹配的项目
+      const kwSet = new Set(keywords);
+      const firstMatch = projectNames.find(pn => {
+        const proj = projects.find(p => p.name === pn);
+        const pkw = Array.isArray(proj?.keywords) ? proj.keywords : [];
+        return pkw.some(k => kwSet.has(k));
+      });
+      setSelectedProject(firstMatch || projectNames[0]);
+      setInitialized(true);
+    }
+  }, [projectNames, initialized, keywords, projects]);
   const [selectedOwner, setSelectedOwner] = useState('');
 
   // 根据选中项目过滤 ASIN 和关键词选项
@@ -58,15 +76,23 @@ export default function Dashboard({ rawData }) {
     return keywords.filter(k => pkw.includes(k));
   }, [selectedProject, projects, keywords]);
 
-  // 当前选中的关键词（用于折线图联动）
-  const defaultKeyword = useMemo(() => getBiggestMover(enriched), [enriched]);
+  // 从给定数据中选ABA排名最高的关键词
+  const pickBestKeyword = (data) => {
+    const snap = getTodaySnapshot(data);
+    const ranked = snap.filter(d => (d['ABA周排名'] || 0) > 0).sort((a, b) => (a['ABA周排名'] || 999) - (b['ABA周排名'] || 999));
+    return ranked[0]?.keyword || snap[0]?.keyword || '';
+  };
+
+  const defaultKeyword = useMemo(() => pickBestKeyword(enriched), [enriched]);
   const [activeKeyword, setActiveKeyword] = useState(defaultKeyword || '');
 
+  // 筛选变化时自动切换为当前数据中最佳关键词
   useEffect(() => {
-    if (defaultKeyword && !activeKeyword) {
-      setActiveKeyword(defaultKeyword);
+    const best = pickBestKeyword(filteredEnriched);
+    if (best && best !== activeKeyword) {
+      setActiveKeyword(best);
     }
-  }, [defaultKeyword]);
+  }, [selectedProject, selectedAsin, selectedOwner]);
 
   if (!rawData || rawData.length === 0) {
     return <div className="empty-state" style={{ padding: 60 }}>暂无数据，请先到"关键词配置"页面导入数据。</div>;

@@ -34,13 +34,15 @@ export default function DetailTable({ snapshot, onKeywordClick, activeKeyword })
     filtered = filtered.filter((d) => getAbaGroup(d['ABA周排名'], thresholds) === abaFilter);
   }
 
-  // 默认排序：SP关键词 → 有自然排名 → 无排名
+  // 默认排序：SP关键词 → 有自然排名(ABA>0) → ABA=0未入榜 → 无排名
   const getSortPriority = (d) => {
     const isSP = d.adType === 'SP';
     const hasNat = d['绝对位置'] < NOT_FOUND_RANK;
+    const aba = d['ABA周排名'] || 0;
     if (isSP) return 0;
-    if (hasNat) return 1;
-    return 2;
+    if (hasNat && aba > 0) return 1;
+    if (hasNat && aba === 0) return 2;
+    return 3;
   };
 
   if (sortField) {
@@ -56,8 +58,12 @@ export default function DetailTable({ snapshot, onKeywordClick, activeKeyword })
       const pa = getSortPriority(a);
       const pb = getSortPriority(b);
       if (pa !== pb) return pa - pb;
-      // 同优先级按ABA排名升序
-      return (a['ABA周排名'] || 0) - (b['ABA周排名'] || 0);
+      // 同优先级：ABA>0按排名升序，ABA=0放最后
+      const abaA = a['ABA周排名'] || 0;
+      const abaB = b['ABA周排名'] || 0;
+      if (abaA === 0 && abaB > 0) return 1;
+      if (abaB === 0 && abaA > 0) return -1;
+      return abaA - abaB;
     });
   }
 
@@ -88,6 +94,7 @@ export default function DetailTable({ snapshot, onKeywordClick, activeKeyword })
             <option value="大词">大词</option>
             <option value="中词">中词</option>
             <option value="小词">小词</option>
+            <option value="未入榜">未入榜</option>
           </select>
         </div>
       </div>
@@ -138,7 +145,7 @@ export default function DetailTable({ snapshot, onKeywordClick, activeKeyword })
                     {d.translation || '-'}
                   </td>
                   <td>
-                    <span className={`tag tag-${getAbaGroup(d['ABA周排名'], thresholds) === '大词' ? 'big' : getAbaGroup(d['ABA周排名'], thresholds) === '中词' ? 'medium' : 'small'}`}>
+                    <span className={`tag tag-${getAbaGroup(d['ABA周排名'], thresholds) === '大词' ? 'big' : getAbaGroup(d['ABA周排名'], thresholds) === '中词' ? 'medium' : getAbaGroup(d['ABA周排名'], thresholds) === '未入榜' ? 'none' : 'small'}`}>
                       {d['ABA周排名']?.toLocaleString()}
                     </span>
                   </td>

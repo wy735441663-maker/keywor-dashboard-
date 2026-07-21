@@ -296,6 +296,7 @@ export function getBiggestMover(enrichedData) {
  * ABA排名分组
  */
 export function getAbaGroup(abaRank, thresholds = { big: 20000, medium: 50000 }) {
+  if (!abaRank || abaRank <= 0) return '未入榜';
   if (abaRank <= thresholds.big) return '大词';
   if (abaRank <= thresholds.medium) return '中词';
   return '小词';
