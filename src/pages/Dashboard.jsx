@@ -23,8 +23,9 @@ import {
 } from '../data/processor';
 
 export default function Dashboard({ rawData }) {
-  // 数据处理
-  const enriched = useMemo(() => enrichData(rawData), [rawData]);
+  // 数据处理：过滤掉 ABA=0 的关键词（不显示，数据源不变）
+  const activeData = useMemo(() => rawData.filter(d => (d['ABA周排名'] || 0) > 0), [rawData]);
+  const enriched = useMemo(() => enrichData(activeData), [activeData]);
   const dates = useMemo(() => getAllDates(enriched), [enriched]);
   const keywords = useMemo(() => getAllKeywords(enriched), [enriched]);
   const asins = useMemo(() => getAllAsins(enriched), [enriched]);
