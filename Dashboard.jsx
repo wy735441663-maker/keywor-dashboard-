@@ -124,10 +124,6 @@ export default function Dashboard({ rawData }) {
       const proj = projects.find(p => p.name === selectedProject);
       const pkw = getProjectKeywords(proj);
       if (pkw.length > 0) result = result.filter(d => pkw.includes(d.keyword));
-      const projAsin = proj ? (proj.asins || [proj.asin]).filter(Boolean) : [];
-      if (projAsin.length > 0 && !selectedAsin) {
-        result = result.filter(d => projAsin.includes(d.asin));
-      }
     }
     if (selectedKeyword) result = result.filter(d => d.keyword === selectedKeyword);
     if (selectedAsin) result = result.filter(d => d.asin === selectedAsin);
